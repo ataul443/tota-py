@@ -3,7 +3,7 @@ import requests
 from time import time
 from assingment import Resources
 import os
-
+from message import Message
 
 
 class Verto(Base):
@@ -31,23 +31,34 @@ class Verto(Base):
     Raises:
         ValueError: If page_num is not an acceptable int.
     '''
-    
+
     def __init__(self, reg_num, ums_pass):
-        
+
         #self.session = requests.session()
         self.regNum = reg_num
         self.umsPass = ums_pass
-        self.baseUrl = 'https://ums.lpu.in/lpuums/' 
-        self.logPayload = {'__LASTFOCUS': '','__EVENTTARGET': 'txtU',
-                            '__EVENTARGUMENT': '','__VIEWSTATE': '',
-                            '__VIEWSTATEGENERATOR': 'DD46A77E',
-                            '__SCROLLPOSITIONX': '0','__SCROLLPOSITIONY': '0',
-                            '__VIEWSTATEENCRYPTED': '','__EVENTVALIDATION': '',
-                            'txtU':	'','Txtpw': '','DropDownList1': '1'
-                            }
+        self.baseUrl = 'https://ums.lpu.in/lpuums/'
+        self.logPayload = {
+            '__LASTFOCUS': '',
+            '__EVENTTARGET': 'txtU',
+            '__EVENTARGUMENT': '',
+            '__VIEWSTATE': '',
+            '__VIEWSTATEGENERATOR': 'DD46A77E',
+            '__SCROLLPOSITIONX': '0',
+            '__SCROLLPOSITIONY': '0',
+            '__VIEWSTATEENCRYPTED': '',
+            '__EVENTVALIDATION': '',
+            'txtU': '',
+            'Txtpw': '',
+            'DropDownList1': '1'
+        }
 
-        self.log1Token = ['__VIEWSTATE','__EVENTVALIDATION']
-        self.log2TokenDict = {'ddlStartWith': 'default3.aspx','iBtnLogins.x':	'0','iBtnLogins.y':	'0', }
+        self.log1Token = ['__VIEWSTATE', '__EVENTVALIDATION']
+        self.log2TokenDict = {
+            'ddlStartWith': 'default3.aspx',
+            'iBtnLogins.x': '0',
+            'iBtnLogins.y': '0',
+        }
         self.hold_page_data = None
         self.session = requests.session()
 
@@ -57,7 +68,7 @@ class Verto(Base):
         '''
         try:
             if page_num == 1:
-                    self.logPayload['txtU'] = self.regNum
+                self.logPayload['txtU'] = self.regNum
             elif page_num == 2:
                 self.logPayload['txtU'] = self.regNum
                 self.logPayload['__EVENTTARGET'] = ''
@@ -68,7 +79,7 @@ class Verto(Base):
         except ValueError as e:
             print("Error: {}".format(e))
         return
-        
+
     def initiater(self):
         '''
         It will return UMS Homepage Account Data as an html tree `obj:lxml.html` 
@@ -82,16 +93,19 @@ class Verto(Base):
         log1Token (`obj:dict`): Containes esseential variables to simulate login-first page request.
         logPayload (`obj:dict`): Containes those variable whose values are need to get extracted from UMS page itself.
         '''
-        
-        loginPage = self.getRequest(self.session,self.baseUrl)
-        self.tokenGetter(loginPage,self.log1Token,self.logPayload)
+
+        loginPage = self.getRequest(self.session, self.baseUrl)
+        self.tokenGetter(loginPage, self.log1Token, self.logPayload)
         self.tokenSetter(1)
-        loginPage = self.postRequest(self.session, self.baseUrl, self.logPayload)
+        loginPage = self.postRequest(self.session, self.baseUrl,
+                                     self.logPayload)
         self.tokenGetter(loginPage, self.log1Token, self.logPayload)
         self.tokenSetter(2)
         try:
-            homePage = self.postRequest(self.session, self.baseUrl, self.logPayload)
-            titleElem = (homePage.xpath("//head[@id='ctl00_Head1']/title/text()"))
+            homePage = self.postRequest(self.session, self.baseUrl,
+                                        self.logPayload)
+            titleElem = (
+                homePage.xpath("//head[@id='ctl00_Head1']/title/text()"))
             titleElem = ('').join(titleElem)
             titleElem = titleElem.strip("\r\n")
             titleElem = titleElem.strip()
@@ -103,3 +117,11 @@ class Verto(Base):
         except ValueError as e:
             print('Method: homePage | {}'.format(e))
             return None, None
+
+
+user = Verto('11704266', 'Allofusare1@')
+
+home, _sess = user.initiater()
+_mess = Message(home)
+mesgList = _mess.initiater()
+print(mesgList)
