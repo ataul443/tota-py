@@ -1,0 +1,8 @@
+# List of required packages (Dependencies)
+redis
+pycurl
+python-telegram-bot
+requests
+lxml
+gevent
+
